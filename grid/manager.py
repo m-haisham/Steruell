@@ -25,7 +25,7 @@ class GridManager:
 
         self.grid = []
         for x in range(size.x):
-            l = [Tile.UNVISITED] * size.y
+            l = [0] * size.y
             self.grid.append(l)
 
         self.tiles = []
@@ -54,12 +54,22 @@ class GridManager:
                     x * self.tilesize.x + x * self.tilepadding.y + self.position.y + self.padding.y,
                 )
 
-                tile = Tile(self.grid[x][y], gridpos=Vector2D(x, y), position=position, size=self.tilesize,
-                            onclick=onclick)
+                tile = Tile(Tile.int_to_state(self.grid[x][y]), gridpos=Vector2D(x, y), position=position,
+                            size=self.tilesize, onclick=onclick)
 
                 self.tiles[x][y] = tile
 
+    def update_grid(self):
+        for tile in self.all_tiles():
+            x, y = tile.gridpos
+            self.grid[x][y] = Tile.state_to_int(tile.state)
+
     def event(self, event):
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_SPACE:
+                self.update_grid()
+
+                # start the a* algorithm
 
         if event.type == pygame.MOUSEBUTTONDOWN:
 
@@ -82,10 +92,10 @@ class GridManager:
 
                         if self.start is None:
                             self.start = tile
+                            tile.state = Tile.START
                         else:
                             self.end = tile
-
-                        tile.state = Tile.ANCHOR
+                            tile.state = Tile.END
 
         if event.type == pygame.MOUSEBUTTONUP:
             # left
@@ -128,3 +138,14 @@ class GridManager:
         for x in range(size.x):
             for y in range(size.y):
                 yield self.tiles[x][y]
+
+    def print_grid(self):
+        size = Vector2D(len(self.tiles), len(self.tiles[0]))
+        for x in range(size.x):
+            print('[', end='')
+            for y in range(size.y):
+                value = self.grid[x][y]
+                print(value, end='')
+                if y != size.y - 1:
+                    print(', ', end='')
+            print(']')
