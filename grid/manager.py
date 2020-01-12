@@ -29,9 +29,16 @@ class GridManager:
             self.grid.append(l)
 
         self.tiles = []
+        for x in range(size.x):
+            l = [None] * size.y
+            self.tiles.append(l)
+
         self.update_tiles(self.grid)
 
+        self.drawable = Switch(True)
+
         self.mouse_left_down = Switch(False)
+        self.mouse_left_down_type = None
 
         self.start = None
         self.end = None
@@ -40,14 +47,7 @@ class GridManager:
         size = Vector2D(len(grid), len(grid[0]))
 
         for x in range(size.x):
-            l = [None] * size.y
-            self.tiles.append(l)
-
-        for x in range(size.x):
             for y in range(size.y):
-
-                def onclick(tile):
-                    tile.state = Tile.WALL
 
                 position = Vector2D(
                     y * self.tilesize.y + y * self.tilepadding.x + self.position.x + self.padding.x,
@@ -55,7 +55,7 @@ class GridManager:
                 )
 
                 tile = Tile(Tile.int_to_state(self.grid[x][y]), gridpos=Vector2D(x, y), position=position,
-                            size=self.tilesize, onclick=onclick)
+                            size=self.tilesize)
 
                 self.tiles[x][y] = tile
 
@@ -69,6 +69,8 @@ class GridManager:
             if event.key == pygame.K_SPACE:
                 self.update_grid()
 
+            if event.key == pygame.K_LSHIFT:
+                self.drawable.flip()
                 # start the a* algorithm
 
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -77,38 +79,55 @@ class GridManager:
             if event.button == 1:
                 self.mouse_left_down.set(True)
 
-                for tile in self.all_tiles():
-                    if tile.inbound(Vector2D.tuple(event.pos)):
-                        tile.clicked()
+                if self.drawable.get():
+                    # for all tiles check and initiate drawing
+                    for tile in self.all_tiles():
+                        if tile.inbound(Vector2D.tuple(event.pos)):
+                            currentstate = tile.state
+                            if currentstate == Tile.WALL:
+                                self.mouse_left_down_type = Tile.UNVISITED
+                            elif currentstate == Tile.UNVISITED:
+                                self.mouse_left_down_type = Tile.WALL
+
+                            if self.mouse_left_down_type is not None:
+                                tile.state = self.mouse_left_down_type
 
             # right
             if event.button == 3:
-                if self.start is not None and self.end is not None:
-                    print('Start and end has been selected')
-                    return
+                if self.drawable.get():
+                    if self.start is None and self.end is None:
+                        for tile in self.all_tiles():
+                            if tile.inbound(Vector2D.tuple(event.pos)):
 
-                for tile in self.all_tiles():
-                    if tile.inbound(Vector2D.tuple(event.pos)):
+                                if self.start is None:
+                                    self.start = tile
+                                    tile.state = Tile.START
+                                else:
+                                    self.end = tile
+                                    tile.state = Tile.END
 
-                        if self.start is None:
-                            self.start = tile
-                            tile.state = Tile.START
                         else:
-                            self.end = tile
-                            tile.state = Tile.END
+                            print('Start and end has been selected')
 
         if event.type == pygame.MOUSEBUTTONUP:
             # left
             if event.button == 1:
                 self.mouse_left_down.set(False)
+                self.mouse_left_down_type = None
 
         if event.type == pygame.MOUSEMOTION:
-
             # left
             if self.mouse_left_down.get():
-                for tile in self.all_tiles():
-                    if tile.inbound(Vector2D.tuple(event.pos)):
-                        tile.clicked()
+
+                if self.drawable.get():
+                    # for all tiles draw / change state
+                    for tile in self.all_tiles():
+                        if tile.state == Tile.START or tile.state == Tile.END:
+                            continue
+
+                        if tile.inbound(Vector2D.tuple(event.pos)):
+                            if self.mouse_left_down_type is not None:
+                                tile.state = self.mouse_left_down_type
 
     def update(self):
         mouse_pos = Vector2D.tuple(pygame.mouse.get_pos())
