@@ -10,7 +10,18 @@ class GridManager:
         self.size = size
         self.position = position
         self.padding = padding
-        self.tilesize = Vector2D(20, 20)
+
+        self.tilepadding = Vector2D(1, 1)
+        screen_size = Vector2D.tuple(pygame.display.get_surface().get_rect().size)
+        space = Vector2D(
+            screen_size.x - position.x - padding.x,
+            screen_size.y - position.y - padding.y
+        )
+
+        self.tilesize = Vector2D(
+            int((space.x - (self.size.x * self.tilepadding.x)) / self.size.x),
+            int((space.y - (self.size.y * self.tilepadding.y)) / self.size.y),
+        )
 
         self.grid = []
         for x in range(size.x):
@@ -26,7 +37,6 @@ class GridManager:
         self.end = None
 
     def update_tiles(self, grid):
-        padding = 1
         size = Vector2D(len(grid), len(grid[0]))
 
         for x in range(size.x):
@@ -40,8 +50,8 @@ class GridManager:
                     tile.state = Tile.WALL
 
                 position = Vector2D(
-                    y * self.tilesize.y + y * padding + self.position.x + self.padding.x,
-                    x * self.tilesize.x + x * padding + self.position.y + self.padding.y,
+                    y * self.tilesize.y + y * self.tilepadding.x + self.position.x + self.padding.x,
+                    x * self.tilesize.x + x * self.tilepadding.y + self.position.y + self.padding.y,
                 )
 
                 tile = Tile(self.grid[x][y], gridpos=Vector2D(x, y), position=position, size=self.tilesize,
@@ -83,9 +93,9 @@ class GridManager:
                 self.mouse_left_down.set(False)
 
         if event.type == pygame.MOUSEMOTION:
+
             # left
             if self.mouse_left_down.get():
-
                 for tile in self.all_tiles():
                     if tile.inbound(Vector2D.tuple(event.pos)):
                         tile.clicked()

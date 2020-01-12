@@ -9,14 +9,14 @@ from widgets import Text, WidgetManager, Button, Hover
 from grid import GridManager
 
 pygame.init()
-size = width, height = 640, 660
+size = width, height = 650, 670
 screen = pygame.display.set_mode(size)
 
 pygame.display.set_caption('A* visualizer')
 
 manager = WidgetManager()
 
-grid = GridManager(Vector2D(30, 30))
+grid = GridManager(Vector2D(40, 40))
 
 framerate = 0
 t0 = time.time()
