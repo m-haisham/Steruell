@@ -17,7 +17,7 @@ pygame.display.set_caption('A* visualizer')
 info = Text('', color=colors.WHITE)
 manager = WidgetManager([info])
 
-grid = GridManager(Vector2D(30, 30), info)
+grid = GridManager(Vector2D(40, 40), info)
 
 framerate = 0
 t0 = time.time()

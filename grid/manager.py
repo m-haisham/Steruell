@@ -87,6 +87,25 @@ class GridManager:
 
             self.tiles[x][y] = tile
 
+    def clean_grid(self, types, to=Tile.UNVISITED):
+        if Tile.END in types:
+            self.end = None
+            self.info_text.text = 'Select end'
+
+        if Tile.START in types:
+            self.start = None
+            self.info_text.text = 'Select start'
+
+        to = Tile.state_to_int(to)
+
+        size = Vector2D(len(self.grid), len(self.grid[0]))
+        for x in range(size.x):
+            for y in range(size.y):
+                tile = self.grid[x][y]
+
+                if Tile.int_to_state(tile) in types:
+                    self.grid[x][y] = to
+
     def update_grid(self):
         for tile in self.all_tiles():
             x, y = tile.gridpos
@@ -108,7 +127,22 @@ class GridManager:
                 self.running.set(True)
 
             if event.key == pygame.K_LSHIFT:
-                self.drawable.flip()
+                if self.running.get():
+                    return
+
+                self.update_grid()
+                self.clean_grid([Tile.VISITED, Tile.START, Tile.END, Tile.PATH, Tile.NEIGHBOURS, Tile.WALL])
+                self.update_tiles(self.grid)
+                self.drawable.set(True)
+
+            if event.key == pygame.K_LCTRL:
+                if self.running.get():
+                    return
+
+                self.update_grid()
+                self.clean_grid([Tile.VISITED, Tile.START, Tile.END, Tile.PATH, Tile.NEIGHBOURS])
+                self.update_tiles(self.grid)
+                self.drawable.set(True)
 
         if event.type == pygame.MOUSEBUTTONDOWN:
 
