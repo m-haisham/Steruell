@@ -119,8 +119,10 @@ class AStarAlgorithm:
                 self.grid[current.x][current.y] = Tile.state_to_int(Tile.PATH)
                 current = self.visited[tuple(current)]
 
+        memory = self.current
         self.current = next_point.position
 
+        return neigbours + [memory]
 
 class Point:
     def __init__(self, position, cost):

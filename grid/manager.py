@@ -69,6 +69,20 @@ class GridManager:
 
                 self.tiles[x][y] = tile
 
+    def remake_tiles(self, positions):
+        for gridposition in positions:
+            x, y = gridposition
+
+            position = Vector2D(
+                y * self.tilesize.y + y * self.tilepadding.x + self.position.x + self.padding.x,
+                x * self.tilesize.x + x * self.tilepadding.y + self.position.y + self.padding.y,
+            )
+
+            tile = Tile(Tile.int_to_state(self.grid[x][y]), gridpos=Vector2D(x, y), position=position,
+                        size=self.tilesize)
+
+            self.tiles[x][y] = tile
+
     def update_grid(self):
         for tile in self.all_tiles():
             x, y = tile.gridpos
@@ -155,10 +169,11 @@ class GridManager:
     def update(self):
         if self.running.get():
             try:
-                self.algorithm.next()
-                self.update_tiles(self.grid)
+                affected = self.algorithm.next()
+                self.remake_tiles(affected)
             except StopIteration:
                 self.running.set(False)
+                self.update_tiles(self.grid)
         else:
             mouse_pos = Vector2D.tuple(pygame.mouse.get_pos())
 
