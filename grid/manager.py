@@ -16,7 +16,7 @@ class GridManager:
         self.info_text = info_text
         self.info_text.text = 'Select start'
 
-        self.tilepadding = Vector2D(1, 1)
+        self.tilepadding = Vector2D(0, 0)
         screen_size = Vector2D.tuple(pygame.display.get_surface().get_rect().size)
         space = Vector2D(
             screen_size.x - position.x - padding.x,
@@ -51,7 +51,11 @@ class GridManager:
         self.algorithm = None
 
         def onflip(val):
-            self.info_text.text = 'Running' if val else "Stopped"
+            if self.algorithm.solution_length == -1:
+                self.info_text.text = 'No solution found'
+                return
+
+            self.info_text.text = 'Running' if val else f'Found solution of length {self.algorithm.solution_length}'
         self.running = Switch(False, onflip=onflip)
 
     def update_tiles(self, grid):
@@ -173,7 +177,6 @@ class GridManager:
                 self.remake_tiles(affected)
             except StopIteration:
                 self.running.set(False)
-                self.update_tiles(self.grid)
         else:
             mouse_pos = Vector2D.tuple(pygame.mouse.get_pos())
 

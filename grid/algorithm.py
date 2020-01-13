@@ -41,6 +41,7 @@ class AStarAlgorithm:
         self.current = self.start
 
         self.solution_found = False
+        self.solution_length = 0
 
     def current_cost(self):
         return self.costgrid[self.current.x][self.current.y]
@@ -54,7 +55,7 @@ class AStarAlgorithm:
             for y in [self.current.y - 1, self.current.y, self.current.y + 1]:
 
                 # index out of range
-                if x < 0 or x > size.x - 1 or y < 0 or y > size.y:
+                if x < 0 or x > size.x - 1 or y < 0 or y > size.y - 1:
                     continue
 
                 # current pos
@@ -104,8 +105,12 @@ class AStarAlgorithm:
 
             else:
                 bisect.insort_right(self.queue, Point(neigbour, gridcost))
-
-        next_point = self.queue.pop(0)
+        try:
+            next_point = self.queue.pop(0)
+        except IndexError:
+            self.solution_found = True
+            self.solution_length = -1
+            return []
 
         self.grid[self.current.x][self.current.y] = Tile.state_to_int(Tile.VISITED)
 
@@ -115,9 +120,16 @@ class AStarAlgorithm:
             current = self.current
             self.grid[current.x][current.y] = Tile.state_to_int(Tile.PATH)
 
+            tiles = neigbours + [current]
+
             while current != self.start:
-                self.grid[current.x][current.y] = Tile.state_to_int(Tile.PATH)
+                self.solution_length += 1
+
                 current = self.visited[tuple(current)]
+                self.grid[current.x][current.y] = Tile.state_to_int(Tile.PATH)
+                tiles.append(current)
+
+            return tiles
 
         memory = self.current
         self.current = next_point.position
