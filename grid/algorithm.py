@@ -12,8 +12,9 @@ class AStarAlgorithm:
         self.end = None
         self.walls = []
 
-        self.visited = {}
         self.queue = []
+        self.parent = {}
+        self.gcost = {}
 
         self.path = ()
 
@@ -39,15 +40,19 @@ class AStarAlgorithm:
                     self.walls.append(Vector2D(x, y))
 
         self.current = self.start
+        self.gcost[tuple(self.current)] = 0
 
         self.solution_found = False
         self.solution_length = 0
 
-    def current_cost(self):
-        return self.costgrid[self.current.x][self.current.y]
+    def g(self, vector):
+        return self.gcost[tuple(vector)]
 
-    def vector_cost(self, vector):
-        return vector.manhattan(self.current) + vector.manhattan(self.end)
+    def h(self, vector):
+        return self.distance(vector, self.end)
+
+    def distance(self, v1, v2):
+        return v1.euclidean(v2)
 
     def get_viable_neigbours(self):
 
@@ -73,11 +78,19 @@ class AStarAlgorithm:
 
                     # update cost
                     grid_cost = self.costgrid[x][y]
-                    calculated_cost = self.vector_cost(Vector2D(x, y))
+
+                    g = self.g(self.current) + self.distance(self.current, Vector2D(x, y))
+                    if grid_cost == -1:
+                        self.gcost[(x, y)] = self.g(self.current) + self.distance(self.current, Vector2D(x, y))
+                    else:
+                        if self.gcost[(x, y)] > g:
+                            self.gcost[(x, y)] = g
+
+                    calculated_cost = self.g(Vector2D(x, y)) + self.h(Vector2D(x, y))
 
                     if grid_cost == -1 or grid_cost > calculated_cost:
                         self.costgrid[x][y] = calculated_cost
-                        self.visited[tuple([x, y])] = self.current
+                        self.parent[(x, y)] = self.current
 
                     if state != Tile.END:
                         self.grid[x][y] = Tile.state_to_int(Tile.NEIGHBOURS)
@@ -105,7 +118,7 @@ class AStarAlgorithm:
             if queued is not None:
                 if queued.cost > gridcost:
                     queued.cost = gridcost
-
+                    self.queue.sort()
             else:
                 bisect.insort_right(self.queue, Point(neigbour, gridcost))
         try:
@@ -115,7 +128,8 @@ class AStarAlgorithm:
             self.solution_length = -1
             return []
 
-        self.grid[self.current.x][self.current.y] = Tile.state_to_int(Tile.VISITED)
+        if self.current != self.start:
+            self.grid[self.current.x][self.current.y] = Tile.state_to_int(Tile.VISITED)
 
         if next_point.position == self.end:
             self.solution_found = True
@@ -126,12 +140,12 @@ class AStarAlgorithm:
             tiles = neigbours + [current]
 
             while current != self.start:
-                self.solution_length += 1
 
-                current = self.visited[tuple(current)]
-                self.grid[current.x][current.y] = Tile.state_to_int(Tile.PATH)
                 tiles.append(current)
+                current = self.parent[tuple(current)]
+                self.grid[current.x][current.y] = Tile.state_to_int(Tile.PATH)
 
+            self.solution_length = self.g(self.end)
             return tiles
 
         memory = self.current

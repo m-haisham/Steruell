@@ -13,7 +13,7 @@ class Tile(Button):
 
     def __init__(self, state, gridpos: Vector2D, size: Vector2D = None, position: Vector2D = Vector2D.zero(),
                  onclick=None):
-        super(Tile, self).__init__(Text(''), size, position, state, onclick)
+        super(Tile, self).__init__(Text('', size=10), size, position, state, onclick)
 
         self.gridpos = gridpos
 

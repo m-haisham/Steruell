@@ -85,6 +85,10 @@ class GridManager:
             tile = Tile(Tile.int_to_state(self.grid[x][y]), gridpos=Vector2D(x, y), position=position,
                         size=self.tilesize)
 
+            # tile.text.text = f'{self.algorithm.costgrid[x][y]:.1f}'
+            # tile.text.text = str(self.algorithm.gcost[(x, y)])
+            # tile.text.text = f'{self.algorithm.gcost[(x, y)]}+{self.algorithm.h(Vector2D(x, y))}'
+
             self.tiles[x][y] = tile
 
     def clean_grid(self, types, to=Tile.UNVISITED):
