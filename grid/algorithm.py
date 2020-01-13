@@ -46,6 +46,9 @@ class AStarAlgorithm:
     def current_cost(self):
         return self.costgrid[self.current.x][self.current.y]
 
+    def vector_cost(self, vector):
+        return vector.manhattan(self.current) + vector.manhattan(self.end)
+
     def get_viable_neigbours(self):
 
         vectors = []
@@ -70,7 +73,7 @@ class AStarAlgorithm:
 
                     # update cost
                     grid_cost = self.costgrid[x][y]
-                    calculated_cost = Vector2D(x, y).manhattan(self.current) + Vector2D(x, y).manhattan(self.end)
+                    calculated_cost = self.vector_cost(Vector2D(x, y))
 
                     if grid_cost == -1 or grid_cost > calculated_cost:
                         self.costgrid[x][y] = calculated_cost

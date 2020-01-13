@@ -182,7 +182,7 @@ class GridManager:
                                     tile.state = Tile.START
 
                                     self.info_text.text = 'Select end'
-                                else:
+                                elif tile.state != Tile.START:
                                     self.end = tile
                                     tile.state = Tile.END
                                     self.info_text.text = 'Ready'
@@ -242,12 +242,13 @@ class GridManager:
             for y in range(size.y):
                 yield self.tiles[x][y]
 
-    def print_grid(self):
-        size = Vector2D(len(self.tiles), len(self.tiles[0]))
+    @staticmethod
+    def print_grid(grid):
+        size = Vector2D(len(grid), len(grid[0]))
         for x in range(size.x):
             print('[', end='')
             for y in range(size.y):
-                value = self.grid[x][y]
+                value = grid[x][y]
                 print(value, end='')
                 if y != size.y - 1:
                     print(', ', end='')
