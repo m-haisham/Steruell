@@ -18,7 +18,10 @@ class WidgetManager:
 
         for widget in self.widgets:
 
-            mouse_is_over = widget.inbound(mouse_pos)
+            try:
+                mouse_is_over = widget.inbound(mouse_pos)
+            except NotImplementedError:
+                continue
 
             if not widget.hover and mouse_is_over:
                 widget.enter()
@@ -32,7 +35,11 @@ class WidgetManager:
 
                 # left button
                 if event.button == 1:
-                    if widget.inbound(Vector2D.tuple(event.pos)):
-                        clicked = getattr(widget, 'clicked', None)
-                        if callable(clicked):
-                            clicked()
+
+                    try:
+                        if widget.inbound(Vector2D.tuple(event.pos)):
+                            clicked = getattr(widget, 'clicked', None)
+                            if callable(clicked):
+                                clicked()
+                    except NotImplementedError:
+                        continue

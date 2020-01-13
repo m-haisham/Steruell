@@ -1,3 +1,5 @@
+import math
+
 
 class Vector2D(tuple):
     def __init__(self, x, y):
@@ -6,6 +8,21 @@ class Vector2D(tuple):
 
     def __new__(cls, x, y):
         return super(Vector2D, cls).__new__(cls, (x, y))
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+    def euclidean(self, other):
+        """
+        :return: euclidean distance between two vectors
+        """
+        return math.sqrt(pow(self.x - other.x, 2) + pow(self.y - other.y, 2))
+
+    def manhattan(self, other):
+        """
+        :return: manhattan distance between two vectors
+        """
+        return abs(self.x - other.x) + abs(self.y - other.y)
 
     @staticmethod
     def custom(surface, x, y, invertx=False, inverty=False):

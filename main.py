@@ -14,9 +14,10 @@ screen = pygame.display.set_mode(size)
 
 pygame.display.set_caption('A* visualizer')
 
-manager = WidgetManager()
+info = Text('', color=colors.WHITE)
+manager = WidgetManager([info])
 
-grid = GridManager(Vector2D(40, 40))
+grid = GridManager(Vector2D(40, 40), info)
 
 framerate = 0
 t0 = time.time()
@@ -34,10 +35,13 @@ while True:
     grid.update()
     grid.draw(screen)
 
+    manager.update()
+    manager.draw(screen)
+
     t1 = time.time()
     framerate = 1 / (t1 - t0)
     t0 = t1
 
-    Text(f'{framerate:.2f} fps', color=colors.WHITE).draw(screen)
+    Text(f'{framerate:.2f} fps', position=Vector2D.custom(screen, 60, 0, invertx=True), color=colors.WHITE).draw(screen)
 
     pygame.display.flip()

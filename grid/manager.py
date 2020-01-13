@@ -1,15 +1,20 @@
 import pygame
+import easygui
 
 from core import Vector2D, Switch, Color
-from grid.tile import Tile
-
+from widgets import Text
+from .tile import Tile
+from .algorithm import AStarAlgorithm
 
 class GridManager:
-    def __init__(self, size: Vector2D, position=Vector2D(0, 20), padding=Vector2D(5, 5)):
+    def __init__(self, size: Vector2D, info_text: Text, position=Vector2D(0, 20), padding=Vector2D(5, 5)):
 
         self.size = size
         self.position = position
         self.padding = padding
+
+        self.info_text = info_text
+        self.info_text.text = 'Select start'
 
         self.tilepadding = Vector2D(1, 1)
         screen_size = Vector2D.tuple(pygame.display.get_surface().get_rect().size)
@@ -43,12 +48,17 @@ class GridManager:
         self.start = None
         self.end = None
 
+        self.algorithm = None
+
+        def onflip(val):
+            self.info_text.text = 'Running' if val else "Stopped"
+        self.running = Switch(False, onflip=onflip)
+
     def update_tiles(self, grid):
         size = Vector2D(len(grid), len(grid[0]))
 
         for x in range(size.x):
             for y in range(size.y):
-
                 position = Vector2D(
                     y * self.tilesize.y + y * self.tilepadding.x + self.position.x + self.padding.x,
                     x * self.tilesize.x + x * self.tilepadding.y + self.position.y + self.padding.y,
@@ -69,9 +79,18 @@ class GridManager:
             if event.key == pygame.K_SPACE:
                 self.update_grid()
 
+                if self.start is None or self.end is None:
+                    easygui.msgbox('Starting point or End point not specified', 'Missing inputs', 'CLOSE')
+                    return
+
+                # lock input and start the a* algorithm
+                self.drawable.set(False)
+
+                self.algorithm = AStarAlgorithm(self.grid)
+                self.running.set(True)
+
             if event.key == pygame.K_LSHIFT:
                 self.drawable.flip()
-                # start the a* algorithm
 
         if event.type == pygame.MOUSEBUTTONDOWN:
 
@@ -95,19 +114,23 @@ class GridManager:
             # right
             if event.button == 3:
                 if self.drawable.get():
-                    if self.start is None and self.end is None:
+
+                    if self.start is None or self.end is None:
                         for tile in self.all_tiles():
                             if tile.inbound(Vector2D.tuple(event.pos)):
 
                                 if self.start is None:
                                     self.start = tile
                                     tile.state = Tile.START
+
+                                    self.info_text.text = 'Select end'
                                 else:
                                     self.end = tile
                                     tile.state = Tile.END
+                                    self.info_text.text = 'Ready'
 
-                        else:
-                            print('Start and end has been selected')
+                    else:
+                        print('Start and end has been selected')
 
         if event.type == pygame.MOUSEBUTTONUP:
             # left
@@ -130,19 +153,22 @@ class GridManager:
                                 tile.state = self.mouse_left_down_type
 
     def update(self):
-        mouse_pos = Vector2D.tuple(pygame.mouse.get_pos())
+        if self.running.get():
+            try:
+                self.algorithm.next()
+                self.update_tiles(self.grid)
+            except StopIteration:
+                self.running.set(False)
+        else:
+            mouse_pos = Vector2D.tuple(pygame.mouse.get_pos())
 
-        size = Vector2D(len(self.tiles), len(self.tiles[0]))
-        for x in range(size.x):
-            for y in range(size.y):
-                tile = self.tiles[x][y]
+            for tile in self.all_tiles():
+                inbound = tile.inbound(mouse_pos)
 
-                mouse_is_over = tile.inbound(mouse_pos)
-
-                if not tile.hover and mouse_is_over:
+                if not tile.hover and inbound:
                     tile.enter()
 
-                if tile.hover and not mouse_is_over:
+                if tile.hover and not inbound:
                     tile.exit()
 
     def draw(self, surface):

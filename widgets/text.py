@@ -8,7 +8,7 @@ from .widget import Widget
 class Text(Widget):
     surface: pygame.SurfaceType
 
-    def __init__(self, text, size=14, italic=False, color: Color = colors.BLACK, font: Font = Roboto.MEDIUM):
+    def __init__(self, text, size=14, italic=False, position=Vector2D.zero(), color: Color = colors.BLACK, font: Font = Roboto.MEDIUM):
         super(Text, self).__init__()
 
         self._text = text
@@ -16,7 +16,8 @@ class Text(Widget):
 
         self.font = font.get(size, italic)
         self.surface = self.font.render(text, True, color)
-        self.position = Vector2D(0, 0)
+        self.position = position
+        self.autocenter = False
 
     @property
     def text(self):
@@ -29,11 +30,12 @@ class Text(Widget):
         prev_rect = self.surface.get_rect()
         self.surface = self.font.render(self.text, True, self.color)
 
-        # size changes depending on amount of text so position is changed
-        self.position = Vector2D(
-            self.position.x + (prev_rect.size[0] - self.surface.get_rect().size[0]) / 2,
-            self.position.y
-        )
+        if self.autocenter:
+            # size changes depending on amount of text so position is changed
+            self.position = Vector2D(
+                self.position.x + (prev_rect.size[0] - self.surface.get_rect().size[0]) / 2,
+                self.position.y
+            )
 
     @property
     def color(self):
@@ -51,6 +53,8 @@ class Text(Widget):
             position.x - (size[0] / 2),
             position.y - (size[1] / 2)
         )
+
+        self.autocenter = True
 
     def draw(self, surface):
         surface.blit(self.surface, self.position)

@@ -6,7 +6,7 @@ class Widget:
         pass
 
     def inbound(self, mouse_pos):
-        raise Exception('Not implemented')
+        raise NotImplementedError('Not implemented')
 
     def enter(self):
         self.hover = True
@@ -15,7 +15,7 @@ class Widget:
         self.hover = False
 
     def draw(self, surface):
-        raise Exception('Not implemented')
+        raise NotImplementedError('Not implemented')
 
 
 class Hover:
