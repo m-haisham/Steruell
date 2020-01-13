@@ -136,6 +136,7 @@ class AStarAlgorithm:
 
         return neigbours + [memory]
 
+
 class Point:
     def __init__(self, position, cost):
         self.position = position

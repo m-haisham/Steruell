@@ -114,6 +114,12 @@ class GridManager:
     def event(self, event):
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:
+                if not self.drawable.get():
+                    easygui.msgbox('Press either Left Ctrl or Left Shift to clear the current grid'
+                                   '\nLeft Ctrl: Everything excluding walls'
+                                   '\nLeft Shift: Everything including walls', 'Clear grid', ok_button='CLOSE')
+                    return
+
                 self.update_grid()
 
                 if self.start is None or self.end is None:
