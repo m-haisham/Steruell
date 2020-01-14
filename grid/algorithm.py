@@ -45,6 +45,8 @@ class AStarAlgorithm:
         self.solution_found = False
         self.solution_length = 0
 
+        self.heuristic_modifier = 1.2
+
     def g(self, vector):
         return self.gcost[tuple(vector)]
 
@@ -86,7 +88,7 @@ class AStarAlgorithm:
                         if self.gcost[(x, y)] > g:
                             self.gcost[(x, y)] = g
 
-                    calculated_cost = self.g(Vector2D(x, y)) + self.h(Vector2D(x, y))
+                    calculated_cost = self.g(Vector2D(x, y)) + self.h(Vector2D(x, y)) * self.heuristic_modifier
 
                     if grid_cost == -1 or grid_cost > calculated_cost:
                         self.costgrid[x][y] = calculated_cost

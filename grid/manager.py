@@ -1,3 +1,5 @@
+import math
+
 import pygame
 import easygui
 
@@ -161,20 +163,38 @@ class GridManager:
                 self.mouse_left_down.set(True)
 
                 if self.drawable.get():
-                    # for all tiles check and initiate drawing
-                    for tile in self.all_tiles():
-                        if tile.inbound(Vector2D.tuple(event.pos)):
-                            currentstate = tile.state
-                            if currentstate == Tile.WALL:
-                                self.mouse_left_down_type = Tile.UNVISITED
-                            elif currentstate == Tile.UNVISITED:
-                                self.mouse_left_down_type = Tile.WALL
 
-                            if self.mouse_left_down_type is not None:
-                                tile.state = self.mouse_left_down_type
+                    # finding tile
+                    position = Vector2D.tuple(event.pos)
+
+                    x = (position.y - self.position.y - self.padding.y) / (self.tilesize.y + self.tilepadding.y)
+                    y = (position.x - self.position.x - self.padding.x) / (self.tilesize.x + self.tilepadding.x)
+
+                    ix = math.floor(x)
+                    iy = math.floor(y)
+
+                    # out of bounds
+                    if ix < 0 or ix >= self.size.x or iy < 0 or iy >= self.size.y:
+                        return
+
+                    tile = self.tiles[ix][iy]
+
+                    # applying
+                    currentstate = tile.state
+                    if currentstate == Tile.WALL:
+                        self.mouse_left_down_type = Tile.UNVISITED
+                    elif currentstate == Tile.UNVISITED:
+                        self.mouse_left_down_type = Tile.WALL
+
+                    if self.mouse_left_down_type is not None:
+                        tile.state = self.mouse_left_down_type
+
+                    # for all tiles check and initiate drawing
+                    # for tile in self.all_tiles():
+                    #     if tile.inbound(Vector2D.tuple(event.pos)):
 
             # right
-            if event.button == 3:
+            elif event.button == 3:
                 if self.drawable.get():
 
                     if self.start is None or self.end is None:
@@ -205,14 +225,25 @@ class GridManager:
             if self.mouse_left_down.get():
 
                 if self.drawable.get():
-                    # for all tiles draw / change state
-                    for tile in self.all_tiles():
-                        if tile.state == Tile.START or tile.state == Tile.END:
-                            continue
 
-                        if tile.inbound(Vector2D.tuple(event.pos)):
-                            if self.mouse_left_down_type is not None:
-                                tile.state = self.mouse_left_down_type
+                    # finding tile
+                    position = Vector2D.tuple(event.pos)
+
+                    x = (position.y - self.position.y - self.padding.y) / (self.tilesize.y + self.tilepadding.y)
+                    y = (position.x - self.position.x - self.padding.x) / (self.tilesize.x + self.tilepadding.x)
+
+                    ix = math.floor(x)
+                    iy = math.floor(y)
+
+                    # out of bounds
+                    if ix < 0 or ix >= self.size.x or iy < 0 or iy >= self.size.y:
+                        return
+
+                    tile = self.tiles[ix][iy]
+
+                    # applying
+                    if self.mouse_left_down_type is not None:
+                        tile.state = self.mouse_left_down_type
 
     def update(self):
         if self.running.get():
