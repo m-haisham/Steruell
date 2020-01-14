@@ -12,3 +12,9 @@ A* algorithm visualizer written in pygame
 `Left ctrl` to erase everything excluding the walls
 
 `Left shift` to erase everything including the walls
+
+`s` to save the current grid
+
+`l` to load the saved grid
+
+The grid is saved to persistent storage on application exit

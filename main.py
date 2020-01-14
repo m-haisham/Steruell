@@ -6,7 +6,7 @@ import pygame
 from core import colors, Switch, Vector2D, Color
 from widgets import Text, WidgetManager, Button, Hover
 
-from grid import GridManager
+from grid import GridManager, AppDatabase
 
 pygame.init()
 size = width, height = 700, 720
@@ -28,6 +28,7 @@ t0 = time.time()
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            AppDatabase.database().save()
             sys.exit()
 
         grid.event(event)

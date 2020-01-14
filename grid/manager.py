@@ -5,8 +5,10 @@ import easygui
 
 from core import Vector2D, Switch, Color
 from widgets import Text
+
 from .tile import Tile
 from .algorithm import AStarAlgorithm
+from .memory import AppDatabase
 
 class GridManager:
     def __init__(self, size: Vector2D, info_text: Text, position=Vector2D(0, 20), padding=Vector2D(0, 0)):
@@ -58,6 +60,7 @@ class GridManager:
                 return
 
             self.info_text.text = 'Running' if val else f'Found solution of length {self.algorithm.solution_length}'
+
         self.running = Switch(False, onflip=onflip)
 
         self.misc = {}
@@ -140,7 +143,7 @@ class GridManager:
                 self.algorithm = AStarAlgorithm(self.grid)
                 self.running.set(True)
 
-            if event.key == pygame.K_LSHIFT:
+            elif event.key == pygame.K_LSHIFT:
                 if self.running.get():
                     return
 
@@ -149,7 +152,7 @@ class GridManager:
                 self.update_tiles(self.grid)
                 self.drawable.set(True)
 
-            if event.key == pygame.K_LCTRL:
+            elif event.key == pygame.K_LCTRL:
                 if self.running.get():
                     return
 
@@ -157,6 +160,23 @@ class GridManager:
                 self.clean_grid([Tile.VISITED, Tile.START, Tile.END, Tile.PATH, Tile.NEIGHBOURS])
                 self.update_tiles(self.grid)
                 self.drawable.set(True)
+
+            elif event.key == pygame.K_s:
+                self.update_grid()
+                AppDatabase.database().save_grid(self.grid)
+
+                easygui.msgbox('Successfully saved the grid', 'Success', 'CLOSE')
+
+            elif event.key == pygame.K_l:
+                grid = AppDatabase.database().load_grid()
+                if grid is None:
+                    easygui.msgbox('Unable to load', 'Missing data', 'CLOSE')
+                    return
+
+                self.grid = grid
+                self.update_tiles(grid)
+
+                easygui.msgbox('Successfully loaded the grid', 'Success', 'CLOSE')
 
         if event.type == pygame.MOUSEBUTTONDOWN:
 
