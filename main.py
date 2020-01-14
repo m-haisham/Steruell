@@ -9,15 +9,18 @@ from widgets import Text, WidgetManager, Button, Hover
 from grid import GridManager
 
 pygame.init()
-size = width, height = 650, 670
-screen = pygame.display.set_mode(size)
+size = width, height = 700, 720
+screen = pygame.display.set_mode(size, pygame.DOUBLEBUF)
+
+# allowed events
+pygame.event.set_allowed([pygame.QUIT, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION, pygame.KEYUP])
 
 pygame.display.set_caption('A* visualizer')
 
 info = Text('', color=colors.WHITE)
 manager = WidgetManager([info])
 
-grid = GridManager(Vector2D(40, 40), info)
+grid = GridManager(Vector2D(50, 50), info)
 
 framerate = 0
 t0 = time.time()

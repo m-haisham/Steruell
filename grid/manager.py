@@ -9,7 +9,7 @@ from .tile import Tile
 from .algorithm import AStarAlgorithm
 
 class GridManager:
-    def __init__(self, size: Vector2D, info_text: Text, position=Vector2D(0, 20), padding=Vector2D(5, 5)):
+    def __init__(self, size: Vector2D, info_text: Text, position=Vector2D(0, 20), padding=Vector2D(0, 0)):
 
         self.size = size
         self.position = position
@@ -60,14 +60,16 @@ class GridManager:
             self.info_text.text = 'Running' if val else f'Found solution of length {self.algorithm.solution_length}'
         self.running = Switch(False, onflip=onflip)
 
+        self.misc = {}
+
     def update_tiles(self, grid):
         size = Vector2D(len(grid), len(grid[0]))
 
         for x in range(size.x):
             for y in range(size.y):
                 position = Vector2D(
-                    y * self.tilesize.y + y * self.tilepadding.x + self.position.x + self.padding.x,
-                    x * self.tilesize.x + x * self.tilepadding.y + self.position.y + self.padding.y,
+                    y * self.tilesize.x + y * self.tilepadding.x + self.position.x + self.padding.x,
+                    x * self.tilesize.y + x * self.tilepadding.y + self.position.y + self.padding.y,
                 )
 
                 tile = Tile(Tile.int_to_state(self.grid[x][y]), gridpos=Vector2D(x, y), position=position,
@@ -164,20 +166,9 @@ class GridManager:
 
                 if self.drawable.get():
 
-                    # finding tile
-                    position = Vector2D.tuple(event.pos)
-
-                    x = (position.y - self.position.y - self.padding.y) / (self.tilesize.y + self.tilepadding.y)
-                    y = (position.x - self.position.x - self.padding.x) / (self.tilesize.x + self.tilepadding.x)
-
-                    ix = math.floor(x)
-                    iy = math.floor(y)
-
-                    # out of bounds
-                    if ix < 0 or ix >= self.size.x or iy < 0 or iy >= self.size.y:
+                    tile = self.tile(event.pos)
+                    if tile is None:
                         return
-
-                    tile = self.tiles[ix][iy]
 
                     # applying
                     currentstate = tile.state
@@ -188,10 +179,6 @@ class GridManager:
 
                     if self.mouse_left_down_type is not None:
                         tile.state = self.mouse_left_down_type
-
-                    # for all tiles check and initiate drawing
-                    # for tile in self.all_tiles():
-                    #     if tile.inbound(Vector2D.tuple(event.pos)):
 
             # right
             elif event.button == 3:
@@ -226,20 +213,9 @@ class GridManager:
 
                 if self.drawable.get():
 
-                    # finding tile
-                    position = Vector2D.tuple(event.pos)
-
-                    x = (position.y - self.position.y - self.padding.y) / (self.tilesize.y + self.tilepadding.y)
-                    y = (position.x - self.position.x - self.padding.x) / (self.tilesize.x + self.tilepadding.x)
-
-                    ix = math.floor(x)
-                    iy = math.floor(y)
-
-                    # out of bounds
-                    if ix < 0 or ix >= self.size.x or iy < 0 or iy >= self.size.y:
+                    tile = self.tile(event.pos)
+                    if tile is None:
                         return
-
-                    tile = self.tiles[ix][iy]
 
                     # applying
                     if self.mouse_left_down_type is not None:
@@ -255,21 +231,47 @@ class GridManager:
         else:
             mouse_pos = Vector2D.tuple(pygame.mouse.get_pos())
 
-            for tile in self.all_tiles():
-                inbound = tile.inbound(mouse_pos)
+            tile = self.tile(mouse_pos)
+            if tile is None:
+                return
 
-                if not tile.hover and inbound:
-                    tile.enter()
+            try:
+                inbound = self.misc['over']
+            except KeyError:
+                inbound = None
 
-                if tile.hover and not inbound:
-                    tile.exit()
+            if not tile.hover:
+                tile.enter()
+
+            if inbound is not None and tile.position != inbound.position:
+                inbound.exit()
+
+            self.misc['over'] = tile
 
     def draw(self, surface):
-        size = Vector2D(len(self.tiles), len(self.tiles[0]))
-
-        for x in range(size.x):
-            for y in range(size.y):
+        for x in range(self.size.x):
+            for y in range(self.size.y):
                 self.tiles[x][y].draw(surface)
+
+    def tile(self, value):
+        if isinstance(value, tuple):
+
+            # finding tile
+            position = Vector2D.tuple(value)
+
+            x = (position.y - self.position.y - self.padding.y) / (self.tilesize.y + self.tilepadding.y)
+            y = (position.x - self.position.x - self.padding.x) / (self.tilesize.x + self.tilepadding.x)
+
+            ix = math.floor(x)
+            iy = math.floor(y)
+
+            # out of bounds
+            if ix < 0 or ix >= self.size.x or iy < 0 or iy >= self.size.y:
+                return
+
+            tile = self.tiles[ix][iy]
+
+        return tile
 
     def all_tiles(self):
         size = Vector2D(len(self.tiles), len(self.tiles[0]))
