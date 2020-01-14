@@ -84,13 +84,8 @@ class GridManager:
         for gridposition in positions:
             x, y = gridposition
 
-            position = Vector2D(
-                y * self.tilesize.y + y * self.tilepadding.x + self.position.x + self.padding.x,
-                x * self.tilesize.x + x * self.tilepadding.y + self.position.y + self.padding.y,
-            )
-
-            tile = Tile(Tile.int_to_state(self.grid[x][y]), gridpos=Vector2D(x, y), position=position,
-                        size=self.tilesize)
+            tile = self.tiles[x][y]
+            tile.state = Tile.int_to_state(self.grid[x][y])
 
             # tile.text.text = f'{self.algorithm.costgrid[x][y]:.1f}'
             # tile.text.text = str(self.algorithm.gcost[(x, y)])
@@ -163,18 +158,26 @@ class GridManager:
 
             elif event.key == pygame.K_s:
                 self.update_grid()
-                AppDatabase.database().save_grid(self.grid)
+
+                copy = []
+                for row in self.grid:
+                    copy.append(row[:])
+
+                AppDatabase.database().save_grid(copy, self.drawable.get())
 
                 easygui.msgbox('Successfully saved the grid', 'Success', 'CLOSE')
 
             elif event.key == pygame.K_l:
-                grid = AppDatabase.database().load_grid()
-                if grid is None:
+                try:
+                    grid, drawable = AppDatabase.database().load_grid()
+                except TypeError:
                     easygui.msgbox('Unable to load', 'Missing data', 'CLOSE')
                     return
 
                 self.grid = grid
-                self.update_tiles(grid)
+                self.update_tiles(self.grid)
+
+                self.drawable.set(drawable)
 
                 easygui.msgbox('Successfully loaded the grid', 'Success', 'CLOSE')
 
