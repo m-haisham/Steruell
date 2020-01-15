@@ -13,8 +13,10 @@ A* algorithm visualizer written in pygame
 
 `Left shift` to erase everything including the walls
 
-`s` to save the current grid
+##### Save System
 
-`l` to load the saved grid
+Key-value pair save system using JsonMemory
 
-The grid is saved to persistent storage on application exit
+`Left alt` + `[0-9]` to save to slot n
+
+`[0-9]` to load from slot n
