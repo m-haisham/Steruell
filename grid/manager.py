@@ -42,7 +42,7 @@ class GridManager:
             l = [None] * size.y
             self.tiles.append(l)
 
-        self.update_tiles(self.grid)
+        self.remake_tiles(self.grid)
 
         self.drawable = Switch(True)
 
@@ -65,7 +65,13 @@ class GridManager:
 
         self.misc = {}
 
-    def update_tiles(self, grid):
+    def remake_tiles(self, grid):
+        """
+        recreates the whole tile grid for :param grid:
+
+        :param grid: blueprint for recreation
+        :return: None
+        """
         size = Vector2D(len(grid), len(grid[0]))
 
         for x in range(size.x):
@@ -76,11 +82,19 @@ class GridManager:
                 )
 
                 tile = Tile(Tile.int_to_state(self.grid[x][y]), gridpos=Vector2D(x, y), position=position,
-                            size=self.tilesize)
+                            padding=Vector2D.zero())
+
+                tile.size = self.tilesize
 
                 self.tiles[x][y] = tile
 
-    def remake_tiles(self, positions):
+    def update_tiles(self, positions):
+        """
+        updates the tile states in :param positions: to match that of self.grid
+
+        :param positions: positions to update
+        :return: None
+        """
         for gridposition in positions:
             x, y = gridposition
 
@@ -94,6 +108,13 @@ class GridManager:
             self.tiles[x][y] = tile
 
     def clean_grid(self, types, to=Tile.UNVISITED):
+        """
+        replaces all the state types in :param types: with state :param to:
+
+        :param types: state types to replace
+        :param to: replacement state
+        """
+
         if Tile.END in types:
             self.end = None
             self.info_text.text = 'Select end'
@@ -113,11 +134,19 @@ class GridManager:
                     self.grid[x][y] = to
 
     def update_grid(self):
+        """
+        updates :var self.grid: to match the current :var self.tiles:
+        """
         for tile in self.all_tiles():
             x, y = tile.gridpos
             self.grid[x][y] = Tile.state_to_int(tile.state)
 
     def event(self, event):
+        """
+        event handling
+
+        :param event: event to handle
+        """
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:
                 if not self.drawable.get():
@@ -144,7 +173,7 @@ class GridManager:
 
                 self.update_grid()
                 self.clean_grid([Tile.VISITED, Tile.START, Tile.END, Tile.PATH, Tile.NEIGHBOURS, Tile.WALL])
-                self.update_tiles(self.grid)
+                self.remake_tiles(self.grid)
                 self.drawable.set(True)
 
             elif event.key == pygame.K_LCTRL:
@@ -153,7 +182,7 @@ class GridManager:
 
                 self.update_grid()
                 self.clean_grid([Tile.VISITED, Tile.START, Tile.END, Tile.PATH, Tile.NEIGHBOURS])
-                self.update_tiles(self.grid)
+                self.remake_tiles(self.grid)
                 self.drawable.set(True)
 
             elif event.key == pygame.K_s:
@@ -176,7 +205,6 @@ class GridManager:
                     return
 
                 self.load(slot)
-
 
         if event.type == pygame.MOUSEBUTTONDOWN:
 
@@ -245,7 +273,7 @@ class GridManager:
         if self.running.get():
             try:
                 affected = self.algorithm.next()
-                self.remake_tiles(affected)
+                self.update_tiles(affected)
             except StopIteration:
                 self.running.set(False)
         else:
@@ -291,11 +319,23 @@ class GridManager:
                     break
 
     def draw(self, surface):
+        """
+        draws all the tiles on to :param surface:
+
+        :param surface: surface to draw the grid on
+        """
         for x in range(self.size.x):
             for y in range(self.size.y):
                 self.tiles[x][y].draw(surface)
 
     def tile(self, value):
+        """
+        :returns: tile depending on value
+
+        in case of tuple :return: tile in pixel positon (x, y)
+        """
+
+        tile = None
         if isinstance(value, tuple):
 
             # finding tile
@@ -316,12 +356,18 @@ class GridManager:
         return tile
 
     def all_tiles(self):
-        size = Vector2D(len(self.tiles), len(self.tiles[0]))
-        for x in range(size.x):
-            for y in range(size.y):
+        """
+        :return: generator, returns all the tiles of this grid
+        """
+        for x in range(len(self.tiles)):
+            for y in range(len(self.tiles[0])):
                 yield self.tiles[x][y]
 
     def save(self, slot):
+        """
+        :return: saves grid to :param slot:
+        """
+
         copy = []
         for row in self.grid:
             copy.append(row[:])
@@ -331,14 +377,29 @@ class GridManager:
         easygui.msgbox(f'Successfully saved the grid to slot {slot}', 'Success', 'CLOSE')
 
     def load(self, slot):
+        """
+        :return: loads grid saved at :param slot:
+        """
         try:
             grid, drawable = AppDatabase.database().load_grid(slot)
         except TypeError:
             easygui.msgbox('Unable to load', 'Missing data', 'CLOSE')
             return
 
-        self.grid = grid
-        self.update_tiles(self.grid)
+        sizex, sizey = len(grid), len(grid[0])
+        if sizex != self.size.x or sizey != self.size.y:
+            action = easygui.buttonbox(f'Expected {self.size}, however got {sizex, sizey}', 'Grid size mismatch', ['DELETE', 'CLOSE'])
+            if action == 'DELETE':
+                AppDatabase.database().delete(slot)
+                AppDatabase.database().save()
+            return
+
+        copy = []
+        for row in grid:
+            copy.append(row[:])
+
+        self.grid = copy
+        self.remake_tiles(self.grid)
 
         self.drawable.set(drawable)
 

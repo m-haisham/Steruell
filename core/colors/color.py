@@ -10,9 +10,15 @@ class Color(tuple):
         return super(Color, cls).__new__(cls, (r, g, b, a))
 
     def rgb(self):
+        """
+        :return: tuple of length 3 denoting (r, g, b)
+        """
         return self.r, self.g, self.b
 
     def rgba(self):
+        """
+        :return: tuple of length 4 denoting (r, g, b, a)
+        """
         return self.r, self.g, self.b, self.a
 
     def __mul__(self, other):
@@ -30,11 +36,19 @@ class Color(tuple):
     __rmul__ = __mul__
 
     def copy(self):
+        """
+        :return: copy of color
+        """
         t = tuple(self)[:]
         return Color.tuple(t)
 
     @staticmethod
-    def lerp(value, *args):
+    def lerp(value: float, *args):
+        """
+        :param value: float between 0 and 1, denoting which percentile to mix color
+        :param args: colors to mix
+        :return: mixed color according to parameters (no alpha channel)
+        """
 
         if value <= 0:
             return args[0]
@@ -66,13 +80,17 @@ class Color(tuple):
         nvalue = 1 - pvalue
 
         return Color(
-            a.r * pvalue + b.r * nvalue,
-            a.g * pvalue + b.g * nvalue,
-            a.b * pvalue + b.b * nvalue,
+            a[0] * pvalue + b[0] * nvalue,
+            a[1] * pvalue + b[1] * nvalue,
+            a[2] * pvalue + b[2] * nvalue,
         )
 
     @staticmethod
     def tuple(t):
+        """
+        :param t: tuple to create color from
+        :return: Color from tuple(t)
+        """
         if len(t) == 3:
             return Color(t[0], t[1], t[2])
 
@@ -80,6 +98,10 @@ class Color(tuple):
 
     @staticmethod
     def hex(s):
+        """
+        :param s: hexadecimal string
+        :return: Color denoted by hexadecimal
+        """
         h = s.string('#')
         return Color.tuple(tuple(int(h[i:i + 2], 16) for i in (0, 2, 4)))
 

@@ -1,5 +1,7 @@
 import bisect
 
+from typing import List
+
 from core import Vector2D
 from .tile import Tile
 
@@ -22,6 +24,7 @@ class AStarAlgorithm:
 
         self.costgrid = []
 
+        # analysis
         size = Vector2D(len(self.grid), len(self.grid[0]))
         for x in range(size.x):
             self.costgrid.append([-1] * size.y)
@@ -48,16 +51,27 @@ class AStarAlgorithm:
         self.heuristic_modifier = 1.2
 
     def g(self, vector):
+        """
+        :return: path length of :param vector:
+        """
         return self.gcost[tuple(vector)]
 
     def h(self, vector):
+        """
+        :return: heuristic value of :param vector:
+        """
         return self.distance(vector, self.end)
 
     def distance(self, v1, v2):
+        """
+        :return: distance from :param v1: to :param v2:
+        """
         return v1.euclidean(v2)
 
-    def get_viable_neigbours(self):
-
+    def get_viable_neigbours(self) -> List[Vector2D]:
+        """
+        :return: vectors of all the viable neighbours(tiles that you can move to) of the current positon (self.current)
+        """
         vectors = []
 
         size = Vector2D(len(self.grid), len(self.grid[0]))
@@ -78,7 +92,7 @@ class AStarAlgorithm:
                 if state in [Tile.UNVISITED, Tile.NEIGHBOURS, Tile.END]:
                     vectors.append(Vector2D(x, y))
 
-                    # update cost
+                    # update grid cost / path cost
                     grid_cost = self.costgrid[x][y]
 
                     g = self.g(self.current) + self.distance(self.current, Vector2D(x, y))
@@ -88,6 +102,7 @@ class AStarAlgorithm:
                         if self.gcost[(x, y)] > g:
                             self.gcost[(x, y)] = g
 
+                    # update cost
                     calculated_cost = self.g(Vector2D(x, y)) + self.h(Vector2D(x, y)) * self.heuristic_modifier
 
                     if grid_cost == -1 or grid_cost > calculated_cost:
@@ -100,6 +115,10 @@ class AStarAlgorithm:
         return vectors
 
     def inqueue(self, position):
+        """
+        :param position: position to search for
+        :return: point with same position if it exists in self.queue else None
+        """
         for point in self.queue:
             if point.position == position:
                 return point
@@ -107,6 +126,12 @@ class AStarAlgorithm:
         return None
 
     def next(self):
+        """
+        moves to the next best location
+        sets self.solution_found to True when end has been reached
+
+        :return: all the grid tiles that have been updates
+        """
         if self.solution_found:
             raise StopIteration()
 
@@ -123,6 +148,8 @@ class AStarAlgorithm:
                     self.queue.sort()
             else:
                 bisect.insort_right(self.queue, Point(neigbour, gridcost))
+
+        # get next position to move to
         try:
             next_point = self.queue.pop(0)
         except IndexError:
@@ -157,6 +184,12 @@ class AStarAlgorithm:
 
 
 class Point:
+    """
+    simple class to wrap position(Vector2D) and cost(float)
+
+    comparison only on cost
+    """
+
     def __init__(self, position, cost):
         self.position = position
         self.cost = cost

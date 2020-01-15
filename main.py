@@ -5,7 +5,7 @@ import pygame
 
 from core import colors, Vector2D
 from grid import GridManager, AppDatabase
-from widgets import Text, WidgetManager
+from widgets import Text, WidgetManager, Button
 
 pygame.init()
 size = width, height = 700, 720
@@ -45,6 +45,6 @@ while True:
     framerate = 1 / (t1 - t0)
     t0 = t1
 
-    Text(f'{framerate:.2f} fps', position=Vector2D.custom(screen, 60, 0, invertx=True), color=colors.WHITE).draw(screen)
+    Text(f'{framerate:.2f} fps', position=Vector2D.custom(screen.get_rect().size, 60, 0, invertx=True), color=colors.WHITE).draw(screen)
 
     pygame.display.flip()

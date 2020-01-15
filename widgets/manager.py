@@ -4,12 +4,22 @@ from core import Vector2D
 
 
 class WidgetManager:
+    """
+    handles drawing and updating the widgets under consideration
+
+    """
     def __init__(self, widgets: list = None):
         self.widgets = widgets
         if self.widgets is None:
             self.widgets = []
 
     def draw(self, surface):
+        """
+        draw all the widgets in self.widgets onto surface
+
+        :param surface: surface to draw the widgets upon
+        :return: None
+        """
         for widget in self.widgets:
             widget.draw(surface)
 
@@ -30,6 +40,12 @@ class WidgetManager:
                 widget.exit()
 
     def event(self, event):
+        """
+        event handler
+
+        :param event: event in consideration
+        :return: None
+        """
         if event.type == pygame.MOUSEBUTTONDOWN:
             for widget in self.widgets:
 

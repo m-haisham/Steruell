@@ -3,10 +3,19 @@ import pygame
 
 class Font:
     def __init__(self, normal, italic):
+        """
+        :param normal: path of normal font
+        :param italic: path of italic font
+        """
         self.normal = normal
         self.italic = italic
 
-    def get(self, size: int, is_italic=False):
+    def get(self, size: int, is_italic=False) -> pygame.font.Font:
+        """
+        :param size: size of font
+        :param is_italic: whether font is italic
+        :return: font object of above attributes
+        """
         return pygame.font.Font(self.italic if is_italic else self.normal, size)
 
 

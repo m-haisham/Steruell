@@ -6,6 +6,9 @@ class Widget:
         pass
 
     def inbound(self, mouse_pos):
+        """
+        :return: whether :param pos: is inside bounding box of widget
+        """
         raise NotImplementedError('Not implemented')
 
     def enter(self):
@@ -15,6 +18,12 @@ class Widget:
         self.hover = False
 
     def draw(self, surface):
+        """
+        draws the widget onto the surface
+
+        :param surface: surface to draw the widget
+        :return: None
+        """
         raise NotImplementedError('Not implemented')
 
 

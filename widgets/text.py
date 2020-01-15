@@ -46,6 +46,10 @@ class Text(Widget):
         self._color = color
         self.surface = self.font.render(self.text, True, self.color)
 
+    @property
+    def rect(self):
+        return self.surface.get_rect()
+
     def center(self, position):
         size = self.surface.get_rect().size
 

@@ -7,18 +7,27 @@ from ..widget import Widget, Hover
 
 
 class Button(Widget):
-    def __init__(self, text: Text, size: Vector2D = None, position: Vector2D = Vector2D.zero(), color: Color = None,
+    """
+    Simple button
+
+
+    """
+    def __init__(self, text: Text, padding: Vector2D = Vector2D(20, 10), position: Vector2D = Vector2D.zero(), color: Color = None,
                  onclick=None):
         super(Button, self).__init__()
 
         # look
         self.text = text
-        self.size = size
-        if self.size is None:
-            self.size = Vector2D(100, 35)
         self._position = position
 
+        self.padding = padding
+        self.size = Vector2D(
+            self.text.rect.size[0] + self.padding.x,
+            self.text.rect.size[1] + self.padding.y
+        )
+
         self.text.center(Vector2D.center(self.position, self.size))
+
 
         # color
         if color is None:
@@ -69,9 +78,9 @@ class Button(Widget):
         surface.blit(s, self.position)
         self.text.draw(surface)
 
-    def inbound(self, mouse_pos: Vector2D):
-        return self.position.x + self.size.x > mouse_pos.x > self.position.x and \
-               self.position.y + self.size.y > mouse_pos.y > self.position.y
+    def inbound(self, pos: Vector2D):
+        return self.position.x + self.size.x > pos.x > self.position.x and \
+               self.position.y + self.size.y > pos.y > self.position.y
 
     def enter(self):
         super(Button, self).enter()
