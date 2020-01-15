@@ -3,10 +3,9 @@ import time
 
 import pygame
 
-from core import colors, Switch, Vector2D, Color
-from widgets import Text, WidgetManager, Button, Hover
-
+from core import colors, Vector2D
 from grid import GridManager, AppDatabase
+from widgets import Text, WidgetManager
 
 pygame.init()
 size = width, height = 700, 720

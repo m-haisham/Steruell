@@ -17,6 +17,10 @@ A* algorithm visualizer written in pygame
 
 Key-value pair save system using JsonMemory
 
+`s` to select and save
+
+`l` to select and load
+
 `Left alt` + `[0-9]` to save to slot n
 
 `[0-9]` to load from slot n

@@ -1,14 +1,14 @@
 import math
 
-import pygame
 import easygui
+import pygame
 
-from core import Vector2D, Switch, Color
+from core import Vector2D, Switch
 from widgets import Text
-
-from .tile import Tile
 from .algorithm import AStarAlgorithm
 from .memory import AppDatabase, key_map
+from .tile import Tile
+
 
 class GridManager:
     def __init__(self, size: Vector2D, info_text: Text, position=Vector2D(0, 20), padding=Vector2D(0, 0)):
@@ -156,6 +156,28 @@ class GridManager:
                 self.update_tiles(self.grid)
                 self.drawable.set(True)
 
+            elif event.key == pygame.K_s:
+                if self.running.get():
+                    return
+
+                slot = easygui.buttonbox('Pick a slot to load', 'Load', list(key_map.values()))
+                if slot is None:
+                    return
+
+                self.update_grid()
+                self.save(slot)
+
+            elif event.key == pygame.K_l:
+                if self.running.get():
+                    return
+
+                slot = easygui.buttonbox('Pick a slot to load', 'Load', list(AppDatabase.database().data.keys()))
+                if slot is None:
+                    return
+
+                self.load(slot)
+
+
         if event.type == pygame.MOUSEBUTTONDOWN:
 
             # left
@@ -246,6 +268,10 @@ class GridManager:
 
             self.misc['over'] = tile
 
+        # saving and loading not allowed while the algorithm is running
+        if self.running.get():
+            return
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LALT]:
             for key in key_map.keys():
@@ -253,37 +279,15 @@ class GridManager:
                 # save
                 if keys[key]:
                     value = key_map[key]
-
                     self.update_grid()
-
-                    copy = []
-                    for row in self.grid:
-                        copy.append(row[:])
-
-                    AppDatabase.database().save_grid(value, copy, self.drawable.get())
-
-                    easygui.msgbox(f'Successfully saved the grid to slot {value}', 'Success', 'CLOSE')
-
+                    self.save(value)
                     break
         else:
             for key in key_map.keys():
                 # load
                 if keys[key]:
                     value = key_map[key]
-
-                    try:
-                        grid, drawable = AppDatabase.database().load_grid(value)
-                    except TypeError:
-                        easygui.msgbox('Unable to load', 'Missing data', 'CLOSE')
-                        return
-
-                    self.grid = grid
-                    self.update_tiles(self.grid)
-
-                    self.drawable.set(drawable)
-
-                    easygui.msgbox(f'Successfully loaded the grid from slot {value}', 'Success', 'CLOSE')
-
+                    self.load(value)
                     break
 
     def draw(self, surface):
@@ -316,6 +320,29 @@ class GridManager:
         for x in range(size.x):
             for y in range(size.y):
                 yield self.tiles[x][y]
+
+    def save(self, slot):
+        copy = []
+        for row in self.grid:
+            copy.append(row[:])
+
+        AppDatabase.database().save_grid(slot, copy, self.drawable.get())
+
+        easygui.msgbox(f'Successfully saved the grid to slot {slot}', 'Success', 'CLOSE')
+
+    def load(self, slot):
+        try:
+            grid, drawable = AppDatabase.database().load_grid(slot)
+        except TypeError:
+            easygui.msgbox('Unable to load', 'Missing data', 'CLOSE')
+            return
+
+        self.grid = grid
+        self.update_tiles(self.grid)
+
+        self.drawable.set(drawable)
+
+        easygui.msgbox(f'Successfully loaded the grid from slot {slot}', 'Success', 'CLOSE')
 
     @staticmethod
     def print_grid(grid):

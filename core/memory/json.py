@@ -39,5 +39,11 @@ class JsonMemory:
 
         return value
 
+    def delete(self, key):
+        try:
+            del self.data[key]
+        except KeyError:
+            value = None
+
     def put(self, key, value):
         self.data[key] = value

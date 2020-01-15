@@ -1,5 +1,6 @@
-import pygame
 from pathlib import Path
+
+import pygame
 
 from core.memory import JsonMemory
 
