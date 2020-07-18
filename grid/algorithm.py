@@ -135,19 +135,19 @@ class AStarAlgorithm:
         if self.solution_found:
             raise StopIteration()
 
-        neigbours = self.get_viable_neigbours()
+        neighbours = self.get_viable_neigbours()
 
-        for neigbour in neigbours:
-            gridcost = self.costgrid[neigbour.x][neigbour.y]
+        for neighbour in neighbours:
+            gridcost = self.costgrid[neighbour.x][neighbour.y]
 
             # enqueue and sort
-            queued = self.inqueue(neigbour)
+            queued = self.inqueue(neighbour)
             if queued is not None:
                 if queued.cost > gridcost:
                     queued.cost = gridcost
                     self.queue.sort()
             else:
-                bisect.insort_right(self.queue, Point(neigbour, gridcost))
+                bisect.insort_right(self.queue, Point(neighbour, gridcost))
 
         # get next position to move to
         try:
@@ -166,7 +166,7 @@ class AStarAlgorithm:
             current = self.current
             self.grid[current.x][current.y] = Tile.state_to_int(Tile.PATH)
 
-            tiles = neigbours + [current]
+            tiles = neighbours + [current]
 
             while current != self.start:
 
@@ -180,7 +180,7 @@ class AStarAlgorithm:
         memory = self.current
         self.current = next_point.position
 
-        return neigbours + [memory]
+        return neighbours + [memory]
 
 
 class Point:

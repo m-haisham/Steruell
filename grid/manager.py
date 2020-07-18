@@ -328,32 +328,27 @@ class GridManager:
             for y in range(self.size.y):
                 self.tiles[x][y].draw(surface)
 
-    def tile(self, value):
+    def tile(self, coord):
         """
         :returns: tile depending on value
 
         in case of tuple :return: tile in pixel positon (x, y)
         """
 
-        tile = None
-        if isinstance(value, tuple):
+        # finding tile
+        position = Vector2D.tuple(coord)
 
-            # finding tile
-            position = Vector2D.tuple(value)
+        x = (position.y - self.position.y - self.padding.y) / (self.tilesize.y + self.tilepadding.y)
+        y = (position.x - self.position.x - self.padding.x) / (self.tilesize.x + self.tilepadding.x)
 
-            x = (position.y - self.position.y - self.padding.y) / (self.tilesize.y + self.tilepadding.y)
-            y = (position.x - self.position.x - self.padding.x) / (self.tilesize.x + self.tilepadding.x)
+        ix = math.floor(x)
+        iy = math.floor(y)
 
-            ix = math.floor(x)
-            iy = math.floor(y)
+        # out of bounds
+        if ix < 0 or ix >= self.size.x or iy < 0 or iy >= self.size.y:
+            return
 
-            # out of bounds
-            if ix < 0 or ix >= self.size.x or iy < 0 or iy >= self.size.y:
-                return
-
-            tile = self.tiles[ix][iy]
-
-        return tile
+        return self.tiles[ix][iy]
 
     def all_tiles(self):
         """
