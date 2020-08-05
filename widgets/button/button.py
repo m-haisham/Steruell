@@ -87,7 +87,10 @@ class Button(Widget):
 
     def draw(self, surface: pygame.SurfaceType):
         surface.blit(self.surface, self.position)
-        # self.text.draw(surface)
+
+        # only draw if there is something to draw
+        if self.text.text:
+            self.text.draw(surface)
 
     def make(self):
         """
