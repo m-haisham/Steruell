@@ -388,11 +388,10 @@ class GridManager:
                 AppDatabase.database().save()
             return
 
-        copy = []
-        for row in grid:
-            copy.append(row[:])
+        # copy to avoid overwriting on database
+        self.grid = [row[:] for row in grid]
 
-        self.grid = copy
+        # recreate whole grid
         self.remake_tiles(self.grid)
 
         self.drawable.set(drawable)
