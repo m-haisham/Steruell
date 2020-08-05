@@ -328,9 +328,7 @@ class GridManager:
 
         :param surface: surface to draw the grid on
         """
-        for x in range(self.size.x):
-            for y in range(self.size.y):
-                self.tiles[x][y].draw(surface)
+        surface.blits([self.tiles[x][y].blit_sequence for x in range(self.size.x) for y in range(self.size.y)])
 
     def tile(self, coord) -> Union[Tile, None]:
         """

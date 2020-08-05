@@ -44,6 +44,10 @@ class Tile(Button):
         surface.blit(self.surface, self.position)
 
     @property
+    def blit_sequence(self):
+        return self.surface, self.position
+
+    @property
     def state(self):
         return self.original_color
 
