@@ -16,6 +16,8 @@ class Button(Widget):
                  onclick=None):
         super(Button, self).__init__()
 
+        self.surface = None
+
         # look
         self.text = text
         self._position = position

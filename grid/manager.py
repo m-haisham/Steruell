@@ -1,4 +1,5 @@
 import math
+from typing import Union, List
 
 import easygui
 import pygame
@@ -276,29 +277,32 @@ class GridManager:
                 self.update_tiles(affected)
             except StopIteration:
                 self.running.set(False)
+
+            # not further actions allowed
+            # when algorithms is running
+            return
         else:
+            # get current mouse position
             mouse_pos = Vector2D.tuple(pygame.mouse.get_pos())
 
+            # get tile in mouse position position
             tile = self.tile(mouse_pos)
             if tile is None:
                 return
 
-            try:
-                inbound = self.misc['over']
-            except KeyError:
-                inbound = None
-
+            # update tile to indicate hover
             if not tile.hover:
                 tile.enter()
 
-            if inbound is not None and tile.position != inbound.position:
-                inbound.exit()
+            # revert previous hover previous hover tile
+            try:
+                inbound = self.misc['over']
+                if tile.position != inbound.position:
+                    inbound.exit()
+            except KeyError:
+                pass
 
             self.misc['over'] = tile
-
-        # saving and loading not allowed while the algorithm is running
-        if self.running.get():
-            return
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LALT]:
@@ -328,7 +332,7 @@ class GridManager:
             for y in range(self.size.y):
                 self.tiles[x][y].draw(surface)
 
-    def tile(self, coord):
+    def tile(self, coord) -> Union[Tile, None]:
         """
         :returns: tile depending on value
 
@@ -350,7 +354,7 @@ class GridManager:
 
         return self.tiles[ix][iy]
 
-    def all_tiles(self):
+    def all_tiles(self) -> List[Tile]:
         """
         :return: generator, returns all the tiles of this grid
         """
