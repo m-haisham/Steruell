@@ -138,7 +138,7 @@ class GridManager:
         """
         updates :var self.grid: to match the current :var self.tiles:
         """
-        for tile in self.all_tiles():
+        for tile in self.iter_tiles():
             x, y = tile.gridpos
             self.grid[x][y] = Tile.state_to_int(tile.state)
 
@@ -232,23 +232,17 @@ class GridManager:
             # right
             elif event.button == 3:
                 if self.drawable.get():
+                    tile = self.tile(event.pos)
 
-                    if self.start is None or self.end is None:
-                        for tile in self.all_tiles():
-                            if tile.inbound(Vector2D.tuple(event.pos)):
+                    if self.start is None:
+                        self.start = tile
+                        tile.state = Tile.START
 
-                                if self.start is None:
-                                    self.start = tile
-                                    tile.state = Tile.START
-
-                                    self.info_text.text = 'Select end'
-                                elif tile.state != Tile.START:
-                                    self.end = tile
-                                    tile.state = Tile.END
-                                    self.info_text.text = 'Ready'
-
-                    else:
-                        print('Start and end has been selected')
+                        self.info_text.text = 'Select end'
+                    elif tile.state != Tile.START:
+                        self.end = tile
+                        tile.state = Tile.END
+                        self.info_text.text = 'Ready'
 
         if event.type == pygame.MOUSEBUTTONUP:
             # left
@@ -257,17 +251,21 @@ class GridManager:
                 self.mouse_left_down_type = None
 
         if event.type == pygame.MOUSEMOTION:
-            # left
+            # left mouse button down
             if self.mouse_left_down.get():
-
                 if self.drawable.get():
 
                     tile = self.tile(event.pos)
                     if tile is None:
                         return
 
-                    # applying
+                    # apply if state does not equal to target
                     if self.mouse_left_down_type is not None:
+
+                        # dont replace [start] and [end] node
+                        if tile.state in [Tile.START, Tile.END]:
+                            return
+
                         tile.state = self.mouse_left_down_type
 
     def update(self):
@@ -307,7 +305,6 @@ class GridManager:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LALT]:
             for key in key_map.keys():
-
                 # save
                 if keys[key]:
                     value = key_map[key]
@@ -352,7 +349,7 @@ class GridManager:
 
         return self.tiles[ix][iy]
 
-    def all_tiles(self) -> List[Tile]:
+    def iter_tiles(self) -> List[Tile]:
         """
         :return: generator, returns all the tiles of this grid
         """
@@ -400,7 +397,7 @@ class GridManager:
 
         self.drawable.set(drawable)
 
-        easygui.msgbox(f'Successfully loaded the grid from slot {slot}', 'Success', 'CLOSE')
+        # easygui.msgbox(f'Successfully loaded the grid from slot {slot}', 'Success', 'CLOSE')
 
     @staticmethod
     def print_grid(grid):
