@@ -1,3 +1,5 @@
+import pygame
+
 from core import Vector2D, Color, colors
 from widgets import Button, Text
 
@@ -34,6 +36,16 @@ class Tile(Button):
         super(Tile, self).__init__(Text('', size=10), padding, position, state, onclick)
 
         self.gridpos = gridpos
+
+    def draw(self, surface: pygame.SurfaceType):
+        """
+        Doesnt draw text to decrease time spent on drawing
+        """
+        surface.blit(self.surface, self.position)
+
+    @property
+    def blit_sequence(self):
+        return self.surface, self.position
 
     @property
     def state(self):

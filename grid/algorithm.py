@@ -137,6 +137,7 @@ class AStarAlgorithm:
 
         neighbours = self.get_viable_neigbours()
 
+        # add neighbours to previous discovered
         for neighbour in neighbours:
             gridcost = self.costgrid[neighbour.x][neighbour.y]
 
@@ -147,19 +148,25 @@ class AStarAlgorithm:
                     queued.cost = gridcost
                     self.queue.sort()
             else:
+                # insert sorted
                 bisect.insort_right(self.queue, Point(neighbour, gridcost))
 
         # get next position to move to
         try:
             next_point = self.queue.pop(0)
+
+        # no neighbours available
+        # no solution available
         except IndexError:
             self.solution_found = True
             self.solution_length = -1
             return []
 
+        # change tile state if it isnt [start] node
         if self.current != self.start:
             self.grid[self.current.x][self.current.y] = Tile.state_to_int(Tile.VISITED)
 
+        # solution found
         if next_point.position == self.end:
             self.solution_found = True
 
@@ -168,8 +175,8 @@ class AStarAlgorithm:
 
             tiles = neighbours + [current]
 
+            # update correct path states
             while current != self.start:
-
                 tiles.append(current)
                 current = self.parent[tuple(current)]
                 self.grid[current.x][current.y] = Tile.state_to_int(Tile.PATH)
@@ -187,7 +194,7 @@ class Point:
     """
     simple class to wrap position(Vector2D) and cost(float)
 
-    comparison only on cost
+    used for comparison, compares only cost
     """
 
     def __init__(self, position, cost):

@@ -12,7 +12,9 @@ class Button(Widget):
 
 
     """
-    def __init__(self, text: Text, padding: Vector2D = Vector2D(20, 10), position: Vector2D = Vector2D.zero(), color: Color = None,
+
+    def __init__(self, text: Text, padding: Vector2D = Vector2D(20, 10), position: Vector2D = Vector2D.zero(),
+                 color: Color = None,
                  onclick=None):
         super(Button, self).__init__()
 
@@ -21,13 +23,12 @@ class Button(Widget):
         self._position = position
 
         self.padding = padding
-        self.size = Vector2D(
+        self._size = Vector2D(
             self.text.rect.size[0] + self.padding.x,
             self.text.rect.size[1] + self.padding.y
         )
 
         self.text.center(Vector2D.center(self.position, self.size))
-
 
         # color
         if color is None:
@@ -41,6 +42,18 @@ class Button(Widget):
 
         if self.onclick is None:
             self.onclick = lambda button: None
+
+        # used to draw
+        self.surface = self.make()
+
+    @property
+    def size(self):
+        return self._size
+
+    @size.setter
+    def size(self, size):
+        self._size = size
+        self.surface = self.make()
 
     @property
     def original_color(self):
@@ -64,19 +77,29 @@ class Button(Widget):
         self._position = value
         self.text.center(Vector2D.center(self.position, self.size))
 
-    def mutate_color(self, other):
-        self._mutable_color = other
+    def mutate_color(self, color):
+        self._mutable_color = color
+        self.surface.fill(color)
 
     def apply_hover(self, onhover: Hover):
         self.onhover = Hover(onhover.onenter, onhover.onexit)
         return self
 
     def draw(self, surface: pygame.SurfaceType):
-        s = pygame.Surface(self.size, pygame.SRCALPHA)
-        s.fill(self.color)
+        surface.blit(self.surface, self.position)
 
-        surface.blit(s, self.position)
-        self.text.draw(surface)
+        # only draw if there is something to draw
+        if self.text.text:
+            self.text.draw(surface)
+
+    def make(self):
+        """
+        :return: new pygame surface
+        """
+        surface = pygame.Surface(self.size, pygame.SRCALPHA)
+        surface.fill(self.color)
+
+        return surface
 
     def inbound(self, pos: Vector2D):
         return self.position.x + self.size.x > pos.x > self.position.x and \
